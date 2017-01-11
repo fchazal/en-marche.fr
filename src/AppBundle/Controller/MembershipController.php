@@ -32,8 +32,9 @@ class MembershipController extends Controller
             $em->flush();
 
             $this->addFlash('info', $this->get('translator')->trans('adherent.registration.success'));
+            $request->getSession()->set('tmp_adherent', $adherent);
 
-            return $this->redirectToRoute('app_membership_register');
+            return $this->redirectToRoute('donation_index');
         }
 
         return $this->render('membership/registration.html.twig', [

@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 class DonationController extends Controller
 {
     /**
-     * @Route("", name="donation_index", options={"expose"=true})
+     * @Route(name="donation_index", options={"expose"=true})
      * @Method({"GET", "POST"})
      */
     public function indexAction(Request $request)
