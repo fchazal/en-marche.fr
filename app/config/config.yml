@@ -2,9 +2,12 @@ imports:
     - { resource: parameters.yml }
     - { resource: security.yml }
     - { resource: assets_version.yml }
+    - { resource: services/admin.xml }
     - { resource: services/content.xml }
     - { resource: services/donation.xml }
     - { resource: services/intl.xml }
+    - { resource: services/media.xml }
+    - { resource: services/storage.xml }
     - { resource: services/twig.xml }
 
 parameters:
@@ -105,3 +108,12 @@ fos_js_routing:
     cache_control:
         public: true
         smaxage: 31536000   # 1 year, to be purged using Cloudflare
+
+sonata_block:
+    default_contexts: [cms]
+    blocks:
+        sonata.admin.block.admin_list:
+            contexts: [admin]
+
+sonata_admin:
+    title_logo: logo/small_bg_white.jpg

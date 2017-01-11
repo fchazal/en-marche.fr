@@ -23,6 +23,13 @@ class AppKernel extends Kernel
             new Lexik\Bundle\PayboxBundle\LexikPayboxBundle(),
             new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
 
+            // Sonata
+            new Sonata\CoreBundle\SonataCoreBundle(),
+            new Sonata\BlockBundle\SonataBlockBundle(),
+            new Knp\Bundle\MenuBundle\KnpMenuBundle(),
+            new Sonata\DoctrineORMAdminBundle\SonataDoctrineORMAdminBundle(),
+            new Sonata\AdminBundle\SonataAdminBundle(),
+
             new AppBundle\AppBundle(),
         ];
 
