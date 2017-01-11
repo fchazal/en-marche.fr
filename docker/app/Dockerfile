@@ -1,6 +1,4 @@
-FROM php:7.1-cli
-
-ENV NODE_VERSION 6.0.0
+FROM php:7.1-apache
 
 RUN buildDeps=" \
         build-essential \
@@ -21,8 +19,6 @@ RUN buildDeps=" \
         libmcrypt4 \
         libjpeg62-turbo \
         libfreetype6 \
-        ssl-cert \
-        graphviz \
     && ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h \
     && docker-php-ext-configure intl \
     && docker-php-ext-configure gmp --with-gmp=/usr/include/x86_64-linux-gnu/ \
@@ -36,16 +32,25 @@ RUN buildDeps=" \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Apache conf
+COPY vhost.conf /etc/apache2/sites-available/docker.conf
+RUN mkdir -p /www/web \
+    && a2ensite docker \
+    && a2enmod rewrite ssl \
+    && service apache2 restart
+
 # PHP conf
 COPY php.ini $PHP_INI_DIR/conf.d/z_docker.ini
 
-RUN curl -k -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Override the image ENTRYPOINT to add some logic
+COPY launcher.sh /usr/local/bin/launcher
+RUN chmod +x /usr/local/bin/launcher
+ENTRYPOINT ["launcher"]
+
+# Expose standard ports
+EXPOSE 80
 
 # Directory of the application
 WORKDIR /www
 
-# NodeJS
-RUN curl -L -o /tmp/nodejs.tar.gz https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.gz \
-    && tar xfvz /tmp/nodejs.tar.gz -C /usr/local --strip-components=1 \
-    && rm -r /tmp/nodejs.tar.gz \
-    && npm install yarn -g
+CMD ["apache2-foreground"]

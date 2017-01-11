@@ -1,13 +1,19 @@
 TOOLS = docker-compose run --rm tools
-CONSOLE = ./bin/console
+CONSOLE = $(TOOLS) bin/console
 
-all: boot install assets run
+.PHONY: clean
+
+all: boot install db assets run
 
 boot:
 	docker-compose up -d
 
 install:
 	$(TOOLS) sh -c "composer install && yarn install"
+
+db:
+	$(CONSOLE) doctrine:database:create --if-not-exists
+	- $(CONSOLE) doctrine:schema:create
 
 assets:
 	$(TOOLS) sh -c "npm run build-dev"
@@ -20,3 +26,6 @@ watch:
 
 test:
 	$(TOOLS) ./vendor/bin/simple-phpunit
+
+clean:
+	docker-compose down

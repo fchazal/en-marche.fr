@@ -1,0 +1,32 @@
+version: "2"
+
+services:
+    app:
+        environment:
+            - VIRTUAL_HOST=en-marche.dev
+            - DOCKER_ENV=1
+        ports:
+            - 8080:80
+
+    mysql:
+        environment:
+            MYSQL_ROOT_PASSWORD: enmarche
+            MYSQL_DATABASE: enmarche
+            MYSQL_USER: enmarche
+            MYSQL_PASSWORD: enmarche
+        ports:
+            - "3306:3306"
+
+    mailcatcher:
+        ports:
+            - "9025:1025"
+            - "9080:1080"
+
+    pma:
+        environment:
+            - VIRTUAL_HOST=pma-en-marche.dev
+            - PMA_HOST=mysql
+            - MYSQL_USER=enmarche
+            - MYSQL_PASSWORD=enmarche
+        ports:
+            - 8081:80
