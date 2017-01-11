@@ -2,6 +2,10 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Exception\ActivationKeyException;
+use AppBundle\Exception\AdherentAlreadyEnabledException;
+use AppBundle\Exception\AdherentBannedException;
+use AppBundle\Exception\AdherentException;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use libphonenumber\PhoneNumber;
@@ -18,6 +22,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class Adherent implements UserInterface
 {
+    const ENABLED = 'ENABLED';
+    const DISABLED = 'DISABLED';
+    const BANNED = 'BANNED';
+
     use EntityIdentityTrait;
     use EntityCrudTrait;
 
@@ -98,6 +106,11 @@ class Adherent implements UserInterface
     private $position;
 
     /**
+     * @ORM\Column(length=10, options={"default"="DISABLED"})
+     */
+    private $status;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $registeredAt;
@@ -131,7 +144,8 @@ class Adherent implements UserInterface
         string $address = null,
         string $city = null,
         string $postalCode = null,
-        PhoneNumber $phone = null
+        PhoneNumber $phone = null,
+        string $status = self::DISABLED
     ) {
         $this->uuid = $uuid;
         $this->password = $password;
@@ -146,6 +160,7 @@ class Adherent implements UserInterface
         $this->postalCode = $postalCode;
         $this->city = $city;
         $this->phone = $phone;
+        $this->status = $status;
         $this->registeredAt = new \DateTime();
     }
 
@@ -225,5 +240,31 @@ class Adherent implements UserInterface
     public function getPostalCode()
     {
         return $this->postalCode;
+    }
+
+    /**
+     * Activates the Adherent account with the provided activation key.
+     *
+     * @param ActivationKey $key
+     *
+     * @throws AdherentException
+     * @throws ActivationKeyException
+     */
+    public function activate(ActivationKey $key)
+    {
+        $uuid = $this->getUuid();
+
+        if (self::ENABLED === $this->status) {
+            throw new AdherentAlreadyEnabledException($uuid);
+        }
+
+        if (self::BANNED === $this->status) {
+            throw new AdherentBannedException($uuid);
+        }
+
+        $key->activate($uuid);
+
+        $this->status = self::ENABLED;
+        $this->activatedAt = new \DateTimeImmutable('now');
     }
 }
